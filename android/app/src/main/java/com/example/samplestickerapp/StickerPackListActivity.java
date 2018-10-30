@@ -17,6 +17,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
@@ -91,7 +92,7 @@ public class StickerPackListActivity extends BaseActivity {
         final int previewSize = getResources().getDimensionPixelSize(R.dimen.sticker_pack_list_item_preview_image_size);
         int firstVisibleItemPosition = packLayoutManager.findFirstVisibleItemPosition();
         StickerPackListItemViewHolder viewHolder = (StickerPackListItemViewHolder) packRecyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition);
-        if (viewHolder != null) {
+        if (viewHolder != null && viewHolder.imageRowView!=null) {
             final int max = Math.max(viewHolder.imageRowView.getMeasuredWidth() / previewSize, 1);
             int numColumns = Math.min(STICKER_PREVIEW_DISPLAY_LIMIT, max);
             allStickerPacksListAdapter.setMaxNumberOfStickersInARow(numColumns);

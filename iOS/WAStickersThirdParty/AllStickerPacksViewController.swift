@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import WebKit
 
 class AllStickerPacksViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -15,6 +16,9 @@ class AllStickerPacksViewController: UIViewController, UITableViewDataSource, UI
     private var needsFetchStickerPacks = true
     private var stickerPacks: [StickerPack] = []
     private var selectedIndex: IndexPath?
+	private var buttonPositions: [Int]=[]
+	
+	private let kButtonInterval=10;
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +28,7 @@ class AllStickerPacksViewController: UIViewController, UITableViewDataSource, UI
         navigationController?.navigationBar.shadowImage = UIImage()
         navigationController?.navigationBar.alpha = 0.0;
         stickerPacksTableView.register(UINib(nibName: "StickerPackTableViewCell", bundle: nil), forCellReuseIdentifier: "StickerPackCell")
+		stickerPacksTableView.register(WebViewTableViewCell.self, forCellReuseIdentifier: "WebViewCell")
         stickerPacksTableView.tableFooterView = UIView(frame: .zero)
     }
 
@@ -54,6 +59,12 @@ class AllStickerPacksViewController: UIViewController, UITableViewDataSource, UI
                     self.navigationController?.navigationBar.alpha = 1.0;
 
                     if stickerPacks.count > 1 {
+						for i in stride(from: self.kButtonInterval, to: stickerPacks.count, by: self.kButtonInterval){
+							self.buttonPositions.append(i+self.buttonPositions.count);
+						}
+						if(self.buttonPositions.isEmpty){
+							self.buttonPositions.append(stickerPacks.count);
+						}
                         self.stickerPacks = stickerPacks
                         self.stickerPacksTableView.reloadData()
                     } else {
@@ -86,7 +97,7 @@ class AllStickerPacksViewController: UIViewController, UITableViewDataSource, UI
     // MARK: Tableview
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return stickerPacks.count
+		return stickerPacks.count+buttonPositions.count;
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -94,11 +105,21 @@ class AllStickerPacksViewController: UIViewController, UITableViewDataSource, UI
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+		if(buttonPositions.contains(indexPath.row)){
+			return tableView.dequeueReusableCell(withIdentifier: "WebViewCell")!;
+		}
+		var diff:Int=0;
+		for pos in buttonPositions{
+			if(indexPath.row>pos){
+				diff+=1;
+			}
+		}
+		let rowIndex:Int=indexPath.row-diff;
         let cell: StickerPackTableViewCell = tableView.dequeueReusableCell(withIdentifier: "StickerPackCell") as! StickerPackTableViewCell
-        cell.stickerPack = stickerPacks[indexPath.row]
+        cell.stickerPack = stickerPacks[rowIndex]
 
         let addButton: UIButton = UIButton(type: .contactAdd)
-        addButton.tag = indexPath.row
+        addButton.tag = rowIndex
         addButton.addTarget(self, action: #selector(addButtonTapped(button:)), for: .touchUpInside)
         cell.accessoryView = addButton
 
@@ -106,9 +127,20 @@ class AllStickerPacksViewController: UIViewController, UITableViewDataSource, UI
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+		if(buttonPositions.contains(indexPath.row)){
+			return;
+		}
         selectedIndex = indexPath
+		
+		var diff:Int=0;
+		for pos in buttonPositions{
+			if(indexPath.row>pos){
+				diff+=1;
+			}
+		}
+		let rowIndex:Int=indexPath.row-diff;
 
-        show(stickerPack: stickerPacks[indexPath.row], animated: true)
+		show(stickerPack: stickerPacks[rowIndex], animated: true)
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
