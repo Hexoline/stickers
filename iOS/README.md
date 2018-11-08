@@ -106,12 +106,17 @@ For advanced developers looking to make a more custom integration and fully cont
 ### Files to use
 Copy the following files from the sample app into your Xcode project:
 * `Limits.swift`
+* `StickerPackManager.swift`
 * `StickerPack.swift`
 * `Sticker.swift`
 * `ImageData.swift`
 * `Interoperability.swift`
 * `WebPManager.swift`
-* All of the files that have the "YY" prefix 
+* All of the files that have the "YY" prefix.
+
+Please remember to create the Bridging Header file (if you don't have one already), and to add `#import "YYImage.h"`
+
+You will also need to add the `WebP.framework` to your Linked Frameworks and Libraries.
 
 ### Create a sticker pack
 To create a sticker pack to be sent to WhatsApp, instantiate a new `StickerPack` object:
@@ -149,6 +154,15 @@ stickerPack.sendToWhatsApp { completed in
 If you don't want to use the API described above, you need to know how the data is sent and its structure. 
 
 To communicate with WhatsApp, you must copy your sticker data into the pasteboard first. See [UIPasteboard](https://developer.apple.com/documentation/uikit/uipasteboard) for more. Then you need to open WhatsApp through the URL scheme `whatsapp://stickerPack`. WhatsApp will then grab your stickers from the pasteboard. 
+
+In order for your app to to be able to check if it can open a URL using the `whatsapp://` scheme, you'll need to add the URL scheme in your `Info.plist` like this:
+
+```
+<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>whatsapp</string>
+	</array>
+```
 
 Format your sticker data into a JSON object with the structure described below. Then convert it into a Data object before putting it in the pasteboard.
 
